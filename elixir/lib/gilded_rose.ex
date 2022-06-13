@@ -22,12 +22,16 @@ defmodule GildedRose do
 
   def update_item(item) when is_aged_brie(item) do
     cond do
-      item.quality < 50 ->
+      item.quality < @max_quality_default ->
         %{item | quality: item.quality + 1}
       true ->
         item
     end
       |> update_sell_in 
+  end
+
+  def update_item(item) when is_sulfuras(item) do
+    %{item | quality: @max_quality_sulfuras}
   end
 
   defp update_sell_in(item) do

@@ -21,4 +21,18 @@ defmodule GildedRoseTest do
     %{sell_in: sell_in} = List.first(updated_list)
     assert 9 == sell_in
   end
+
+  test "Sulfuras: check if sell_in is unchanged" do
+    items = [%Item{name: "Sulfuras, Hand of Ragnaros", sell_in: 10, quality: 25}]
+    updated_list = GildedRose.update_quality(items)
+    %{sell_in: sell_in} = List.first(updated_list)
+    assert 10 == sell_in
+  end
+
+  test "Sulfuras: check if quality is 80" do
+    items = [%Item{name: "Sulfuras, Hand of Ragnaros", sell_in: 10, quality: 80}]
+    updated_list = GildedRose.update_quality(items)
+    %{quality: quality} = List.first(updated_list)
+    assert 80 == quality
+  end
 end
