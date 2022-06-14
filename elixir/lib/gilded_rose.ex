@@ -7,8 +7,10 @@ defmodule GildedRose do
   @backstage_passes "Backstage passes to a TAFKAL80ETC concert"
   @sulfuras "Sulfuras, Hand of Ragnaros"
   @conjured "Conjured"
+  @min_quality_default 0
   @max_quality_default 50
   @max_quality_sulfuras 80
+  @default_degrade 1
 
   defguardp is_aged_brie(item) when item.name === @aged_brie
   defguardp is_backstage_passes(item) when item.name === @backstage_passes
@@ -25,6 +27,12 @@ defmodule GildedRose do
 
   defp update_item(item) when is_aged_brie(item) do
     %{item | quality: item.quality + 1}
+      |> restrict_quality
+      |> update_sell_in
+  end
+
+  defp update_item(item) when is_conjured(item) do
+    %{item | quality: item.quality - (2 * @default_degrade)}
       |> restrict_quality
       |> update_sell_in
   end
@@ -49,7 +57,11 @@ defmodule GildedRose do
   end
 
   defp restrict_quality(item) do
-    if item.quality > @max_quality_default, do: %{item | quality: 50}, else: item
+    cond do
+      item.quality > @max_quality_default -> %{item | quality: 50}
+      item.quality < @min_quality_default -> %{item | quality: 0}
+      true -> item
+    end
   end
 
   def update_item_original(item) do
