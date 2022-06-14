@@ -12,58 +12,94 @@ export class Item {
 
 export class GildedRose {
   items: Array<Item>;
+  AGED_BRIE = 'Aged Brie';
+  BACKSTAGE_PASSES = 'Backstage passes to a TAFKAL80ETC concert';
+  SULFURAS = 'Sulfuras, Hand of Ragnaros';
+  CONJURED = 'Conjured';
+  MIN_QUALITY_DEFAULT: number = 0;
+  MAX_QUALITY_DEFAULT = 50;
+  MAX_QUALITY_SULFURAS = 80;
+  DEFAULT_DEGRADE = 1;
 
-  constructor(items = [] as Array<Item>) {
+  constructor(items: Item[] = []) {
     this.items = items;
   }
 
   updateQuality() {
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.items[i].name != 'Aged Brie' && this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-        if (this.items[i].quality > 0) {
-          if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-            this.items[i].quality = this.items[i].quality - 1
-          }
-        }
-      } else {
-        if (this.items[i].quality < 50) {
-          this.items[i].quality = this.items[i].quality + 1
-          if (this.items[i].name == 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].sellIn < 11) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1
-              }
-            }
-            if (this.items[i].sellIn < 6) {
-              if (this.items[i].quality < 50) {
-                this.items[i].quality = this.items[i].quality + 1
-              }
-            }
-          }
-        }
+    this.items.map((item: Item) => {
+      switch (item.name) {
+        case this.AGED_BRIE:
+          item = this.updateAgedBrie(item);
+          break;
+        case this.SULFURAS:
+          break;
+        case this.BACKSTAGE_PASSES:
+          item = this.updateBackstagePasses(item);
+          break;
+        case this.CONJURED:
+          item = this.updateConjured(item);
+          break;
+        default:
+          item = this.updateDefault(item);
       }
-      if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-        this.items[i].sellIn = this.items[i].sellIn - 1;
-      }
-      if (this.items[i].sellIn < 0) {
-        if (this.items[i].name != 'Aged Brie') {
-          if (this.items[i].name != 'Backstage passes to a TAFKAL80ETC concert') {
-            if (this.items[i].quality > 0) {
-              if (this.items[i].name != 'Sulfuras, Hand of Ragnaros') {
-                this.items[i].quality = this.items[i].quality - 1
-              }
-            }
-          } else {
-            this.items[i].quality = this.items[i].quality - this.items[i].quality
-          }
-        } else {
-          if (this.items[i].quality < 50) {
-            this.items[i].quality = this.items[i].quality + 1
-          }
-        }
-      }
-    }
+    });
 
     return this.items;
+  }
+
+  updateDefault(item: Item): Item {
+    item.quality = item.sellIn < 0 ? item.quality - (2 * this.DEFAULT_DEGRADE) : item.quality - this.DEFAULT_DEGRADE;
+    item.quality = this.restrictQuality(item.quality);
+    item.sellIn = this.updateSellIn(item.sellIn);
+    return item;
+  }
+
+  updateAgedBrie(item: Item): Item {
+    item.quality = item.quality + 1;
+    item.quality = this.restrictQuality(item.quality);
+    item.sellIn = this.updateSellIn(item.sellIn);
+    return item;
+  }
+
+  updateConjured(item: Item): Item {
+    item.quality = item.sellIn < 0 ? item.quality - (4 * this.DEFAULT_DEGRADE) : item.quality - (2 * this.DEFAULT_DEGRADE);
+    item.quality = this.restrictQuality(item.quality);
+    item.sellIn = this.updateSellIn(item.sellIn);
+    return item;
+  }
+
+  updateBackstagePasses(item: Item): Item {
+    switch (true) {
+      case item.sellIn >= 0 && item.sellIn <= 5:
+        item.quality = item.quality + 3;
+        break;
+      case item.sellIn >= 6 && item.sellIn <= 10:
+        item.quality = item.quality + 2;
+        break;
+      case item.sellIn > 10:
+        item.quality = item.quality + 1;
+        break;
+      case item.sellIn < 0:
+        item.quality = 0;
+        break;
+    }
+    item.quality = this.restrictQuality(item.quality);
+    item.sellIn = this.updateSellIn(item.sellIn);
+    return item;
+  }
+
+  restrictQuality(quality: number): number {
+    switch (true) {
+      case (quality < this.MIN_QUALITY_DEFAULT):
+        return this.MIN_QUALITY_DEFAULT;
+      case (quality > this.MAX_QUALITY_DEFAULT):
+        return this.MAX_QUALITY_DEFAULT;
+      default:
+        return quality;
+    }
+  }
+
+  updateSellIn(sellIn: number): number {
+    return sellIn - 1;
   }
 }

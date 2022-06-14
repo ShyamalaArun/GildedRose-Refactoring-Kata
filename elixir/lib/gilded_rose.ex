@@ -24,10 +24,11 @@ defmodule GildedRose do
   end
 
   defp update_item(item) when is_default(item) do
-    if item.sell_in < 0, 
-      do: %{item | quality: item.quality - (2 * @default_degrade)},
-      else: %{item | quality: item.quality - @default_degrade}
+    if item.sell_in < 0
+      do %{item | quality: item.quality - (2 * @default_degrade)}
+      else %{item | quality: item.quality - @default_degrade} end
         |> restrict_quality
+        |> IO.inspect
         |> update_sell_in
   end
 
@@ -70,8 +71,8 @@ defmodule GildedRose do
 
   defp restrict_quality(item) do
     cond do
-      item.quality > @max_quality_default -> %{item | quality: 50}
-      item.quality < @min_quality_default -> %{item | quality: 0}
+      item.quality > @max_quality_default -> %{item | quality: @max_quality_default}
+      item.quality < @min_quality_default -> %{item | quality: @min_quality_default}
       true -> item
     end
   end
