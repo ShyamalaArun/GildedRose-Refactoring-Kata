@@ -19,6 +19,7 @@ defmodule GildedRose do
   defguardp is_default(item) when item.name !== @aged_brie and item.name !== @backstage_passes 
                             and item.name !== @sulfuras and item.name !== @conjured
 
+  @spec update_quality([Item.t()]) :: [Item.t()]
   def update_quality(items) do
     Enum.map(items, &update_item/1)
   end
@@ -28,7 +29,6 @@ defmodule GildedRose do
       do %{item | quality: item.quality - (2 * @default_degrade)}
       else %{item | quality: item.quality - @default_degrade} end
         |> restrict_quality
-        |> IO.inspect
         |> update_sell_in
   end
 
@@ -43,9 +43,9 @@ defmodule GildedRose do
   end
 
   defp update_item(item) when is_conjured(item) do
-    if item.sell_in < 0, 
-      do: %{item | quality: item.quality - (4 * @default_degrade)},
-      else: %{item | quality: item.quality - (2 * @default_degrade)}
+    if item.sell_in < 0
+      do %{item | quality: item.quality - (4 * @default_degrade)}
+      else %{item | quality: item.quality - (2 * @default_degrade)} end
         |> restrict_quality
         |> update_sell_in
   end
