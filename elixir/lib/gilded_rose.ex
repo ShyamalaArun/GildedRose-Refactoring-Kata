@@ -17,25 +17,39 @@ defmodule GildedRose do
 
   def update_quality(items) do
     Enum.map(items, &update_item/1)
-    |> IO.inspect
   end
 
-  def update_item(item) when is_aged_brie(item) do
-    cond do
-      item.quality < @max_quality_default ->
-        %{item | quality: item.quality + 1}
-      true ->
-        item
-    end
-      |> update_sell_in 
-  end
-
-  def update_item(item) when is_sulfuras(item) do
+  defp update_item(item) when is_sulfuras(item) do
     %{item | quality: @max_quality_sulfuras}
+  end
+
+  defp update_item(item) when is_aged_brie(item) do
+    %{item | quality: item.quality + 1}
+      |> restrict_quality
+      |> update_sell_in
+  end
+
+  defp update_item(item) when is_backstage_passes(item) do
+    cond do
+      item.sell_in > 10 ->
+        %{item | quality: item.quality + 1}
+      item.sell_in in 6..10 ->
+        %{item | quality: item.quality + 2}
+      item.sell_in in 0..5 ->
+        %{item | quality: item.quality + 3}
+      item.sell_in < 0 ->
+        %{item | quality: 0}
+    end
+      |> restrict_quality
+      |> update_sell_in
   end
 
   defp update_sell_in(item) do
     %{item | sell_in: item.sell_in - 1}
+  end
+
+  defp restrict_quality(item) do
+    if item.quality > @max_quality_default, do: %{item | quality: 50}, else: item
   end
 
   def update_item_original(item) do
