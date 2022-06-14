@@ -85,6 +85,13 @@ defmodule GildedRoseTest do
     assert 28 == quality
   end
 
+  test "Conjured: check if quality reduces twice" do
+    items = [%Item{name: "Conjured", sell_in: -5, quality: 30}]
+    updated_list = GildedRose.update_quality(items)
+    %{quality: quality} = List.first(updated_list)
+    assert 26 == quality
+  end
+
   test "Conjured: check if sell in day decreases" do
     items = [%Item{name: "Conjured", sell_in: 10, quality: 25}]
     updated_list = GildedRose.update_quality(items)
@@ -94,6 +101,34 @@ defmodule GildedRoseTest do
 
   test "Conjured: check if quality is not negative" do
     items = [%Item{name: "Conjured", sell_in: 10, quality: 1}]
+    updated_list = GildedRose.update_quality(items)
+    %{quality: quality} = List.first(updated_list)
+    assert 0 == quality
+  end
+
+  test "Default: check if quality reduces" do
+    items = [%Item{name: "Default", sell_in: 5, quality: 30}]
+    updated_list = GildedRose.update_quality(items)
+    %{quality: quality} = List.first(updated_list)
+    assert 29 == quality
+  end
+
+  test "Default: check if quality reduces twice" do
+    items = [%Item{name: "Default", sell_in: -5, quality: 30}]
+    updated_list = GildedRose.update_quality(items)
+    %{quality: quality} = List.first(updated_list)
+    assert 28 == quality
+  end
+
+  test "Default: check if sell in day decreases" do
+    items = [%Item{name: "Default", sell_in: 10, quality: 25}]
+    updated_list = GildedRose.update_quality(items)
+    %{sell_in: sell_in} = List.first(updated_list)
+    assert 9 == sell_in
+  end
+
+  test "Default: check if quality is not negative" do
+    items = [%Item{name: "Default", sell_in: 10, quality: 1}]
     updated_list = GildedRose.update_quality(items)
     %{quality: quality} = List.first(updated_list)
     assert 0 == quality
